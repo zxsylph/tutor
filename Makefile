@@ -109,16 +109,13 @@ android-dockerhub: android-build android-push
 
 build:
 	# We need to build with docker, as long as docker-compose cannot push to dockerhub
-	docker build -t regis/openedx:latest -t regis/openedx:ginkgo openedx/
-	docker build -t regis/openedx-forum:latest -t regis/openedx-forum:ginkgo forum/
-	docker build -t regis/openedx-xqueue:latest -t regis/openedx-xqueue:ginkgo xqueue/
+	docker build -t regis/openedx:ginkgo openedx/
+	docker build -t regis/openedx-forum:ginkgo forum/
+	docker build -t regis/openedx-xqueue:ginkgo xqueue/
 
 push:
 	docker push regis/openedx:ginkgo
-	docker push regis/openedx:latest
 	docker push regis/openedx-forum:ginkgo
-	docker push regis/openedx-forum:latest
 	docker push regis/openedx-xqueue:ginkgo
-	docker push regis/openedx-xqueue:latest
 
 dockerhub: build push
