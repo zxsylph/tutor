@@ -2,7 +2,7 @@
 
 Note: Breaking changes between versions are indicated by "💥".
 
-## Unreleased
+## ## 3.7.4 (2019-10-18)
 
 - [Improvement] Add missing cms/lms production/development setting patches
 - [Improvement] Allow SigV4 authentication for video upload to S3
