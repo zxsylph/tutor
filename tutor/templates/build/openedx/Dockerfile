@@ -39,7 +39,7 @@ RUN pip install setuptools==39.0.1 pip==9.0.3
 RUN pip install -r requirements/edx/base.txt
 
 # Install a recent version of nodejs
-RUN nodeenv /openedx/nodeenv --node=8.9.3 --prebuilt
+RUN nodeenv /openedx/nodeenv --node=12.13.0 --prebuilt
 ENV PATH /openedx/nodeenv/bin:${PATH}
 
 # Install nodejs requirements
