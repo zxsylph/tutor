@@ -7,5 +7,7 @@ from lms.envs.devstack import *
 # Setup correct webpack configuration file for development
 WEBPACK_CONFIG_PATH = "webpack.dev.config.js"
 
+SESSION_COOKIE_DOMAIN = "localhost"
+
 {{ patch("openedx-development-settings") }}
 {{ patch("openedx-lms-development-settings") }}

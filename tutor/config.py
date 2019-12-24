@@ -101,6 +101,7 @@ def load_required(config, defaults):
         "OPENEDX_MYSQL_PASSWORD",
         "ANDROID_OAUTH2_SECRET",
         "ID",
+        "JWT_RSA_PRIVATE_KEY",
     ]:
         if key not in config:
             config[key] = env.render_unknown(config, defaults[key])

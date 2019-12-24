@@ -51,10 +51,13 @@ class Renderer:
         environment.filters["common_domain"] = utils.common_domain
         environment.filters["encrypt"] = utils.encrypt
         environment.filters["list_if"] = utils.list_if
+        environment.filters["long_to_base64"] = utils.long_to_base64
         environment.filters["random_string"] = utils.random_string
         environment.filters["reverse_host"] = utils.reverse_host
+        environment.filters["rsa_private_key"] = utils.rsa_private_key
         environment.filters["walk_templates"] = self.walk_templates
         environment.globals["patch"] = self.patch
+        environment.globals["rsa_import_key"] = utils.rsa_import_key
         environment.globals["TUTOR_VERSION"] = __version__
         self.environment = environment
 

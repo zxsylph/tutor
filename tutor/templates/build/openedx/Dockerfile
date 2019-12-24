@@ -6,10 +6,19 @@ MAINTAINER Overhang.io <contact@overhang.io>
 # Install system requirements
 RUN apt update && \
     # Global requirements
-    apt install -y language-pack-en git python-virtualenv build-essential software-properties-common curl git-core libxml2-dev libxslt1-dev python-virtualenv libmysqlclient-dev python-apt python-dev libxmlsec1-dev libfreetype6-dev swig gcc g++ \
+    apt install -y language-pack-en git build-essential software-properties-common curl git-core libmysqlclient-dev libxml2-dev libxslt1-dev libxmlsec1-dev libfreetype6-dev swig gcc g++ \
+    # pyenv/python requirements
+    libbz2-dev libreadline-dev \
     # openedx requirements
     gettext gfortran graphviz graphviz-dev libffi-dev libfreetype6-dev libgeos-dev libjpeg8-dev liblapack-dev libpng12-dev libsqlite3-dev libxml2-dev libxmlsec1-dev libxslt1-dev lynx nodejs npm ntp pkg-config \
     && rm -rf /var/lib/apt/lists/*
+ENV LC_ALL en_US.UTF-8
+
+# Install python with pyenv
+ARG PYTHON_VERSION=3.5.9
+ENV PYENV_ROOT /opt/pyenv
+RUN git clone https://github.com/pyenv/pyenv $PYENV_ROOT --branch v1.2.18 --depth 1 \
+    && $PYENV_ROOT/bin/pyenv install $PYTHON_VERSION
 
 # Dockerize will be useful to wait for mysql DB availability
 ARG DOCKERIZE_VERSION=v0.6.1
@@ -17,53 +26,35 @@ RUN curl -L -o /tmp/dockerize.tar.gz https://github.com/jwilder/dockerize/releas
     && tar -C /usr/local/bin -xzvf /tmp/dockerize.tar.gz \
     && rm /tmp/dockerize.tar.gz
 
-# Checkout edx-platform code: https://github.com/edx/edx-platform/commits/open-release/ironwood.master
-# Because we are pulling from a branch, and not a tag, you should manually modify the
-# date hash below to force clearing the docker cache.
+# Checkout edx-platform code
 ARG EDX_PLATFORM_REPOSITORY=https://github.com/edx/edx-platform.git
-ARG EDX_PLATFORM_VERSION=open-release/ironwood.master
-ARG EDX_PLATFORM_VERSION_DATE=20200505
+ARG EDX_PLATFORM_VERSION=open-release/juniper.rc2
 RUN mkdir -p /openedx/edx-platform && \
-    echo "Pulling $EDX_PLATFORM_VERSION tag from $EDX_PLATFORM_REPOSITORY ($EDX_PLATFORM_VERSION_DATE)" && \
     git clone $EDX_PLATFORM_REPOSITORY --branch $EDX_PLATFORM_VERSION --depth 1 /openedx/edx-platform
 WORKDIR /openedx/edx-platform
 
-# Apply patches
-# Allow SigV4 authentication for video uploads to S3 https://github.com/edx/edx-platform/pull/22080
-RUN curl https://github.com/overhangio/edx-platform/commit/0d4f6cc3433013960b28e963c4094ef2a2a92f04.patch | git apply -
-# Resolve missing tasks in CMS 
-# https://github.com/edx/edx-platform/pull/21297/
-# https://github.com/edx/edx-platform/pull/21305/
-RUN curl https://github.com/edx/edx-platform/commit/adb2c672e4d17cc1c42bdc206a0051e0fa16b5be.patch | git apply -
-RUN curl https://github.com/edx/edx-platform/commit/b7ecd80a2bef0d845c3bce97818e70fb3ed9e36d.patch | git apply -
-
 # Download extra locales to /openedx/locale/contrib/locale
+# TODO upgrade to juniper
 RUN cd /tmp \
-    && curl -L -o openedx-i18n.tar.gz https://github.com/openedx/openedx-i18n/archive/ironwood.tar.gz \
+    && curl -L -o openedx-i18n.tar.gz https://github.com/openedx/openedx-i18n/archive/juniper.rc2.tar.gz \
     && tar xzf /tmp/openedx-i18n.tar.gz \
     && mkdir -p /openedx/locale/contrib \
-    && mv openedx-i18n-ironwood/edx-platform/locale /openedx/locale/contrib \
+    && mv openedx-i18n-juniper.rc2/edx-platform/locale /openedx/locale/contrib \
     && rm -rf openedx-i18n*
 
 # Install python requirements in a virtualenv
-RUN virtualenv /openedx/venv
+RUN $PYENV_ROOT/versions/$PYTHON_VERSION/bin/pyvenv /openedx/venv
 ENV PATH /openedx/venv/bin:${PATH}
 ENV VIRTUAL_ENV /openedx/venv/
-RUN pip install setuptools==39.0.1 pip==9.0.3
+RUN pip install setuptools==39.0.1 pip==19.3.1
 RUN pip install -r requirements/edx/base.txt
 
-# Install patched version of ora2
-RUN pip uninstall -y ora2 && \
-    pip install git+https://github.com/overhangio/edx-ora2.git@2.2.0-patched#egg=ora2==2.2.0
-
-# Install patched version of edx-oauth2-provider
-RUN pip install git+https://github.com/overhangio/edx-oauth2-provider.git@1.2.3#egg=edx-oauth2-provider==1.2.3
-
-# Install ironwood-compatible scorm xblock
-RUN pip install "openedx-scorm-xblock<10.0.0,>=9.1.1"
+# Install juniper-compatible scorm xblock
+# TODO test and publish more recent version of scorm xblock (if necessary)
+# RUN pip install "openedx-scorm-xblock<11.0.0,>=10.0.0"
 
 # Install a recent version of nodejs
-RUN nodeenv /openedx/nodeenv --node=8.9.3 --prebuilt
+RUN nodeenv /openedx/nodeenv --node=12.13.0 --prebuilt
 ENV PATH /openedx/nodeenv/bin:${PATH}
 
 # Install nodejs requirements
@@ -78,10 +69,13 @@ RUN cd /openedx/requirements/ \
   && touch ./private.txt \
   && pip install -r ./private.txt
 
-# Create folder that will store *.env.json and *.auth.json files, as well as
+# Create folder that will store lms/cms.env.json files, as well as
 # the tutor-specific settings files.
 RUN mkdir -p /openedx/config ./lms/envs/tutor ./cms/envs/tutor
-ENV CONFIG_ROOT /openedx/config
+COPY revisions.yml /openedx/config/
+ENV LMS_CFG /openedx/config/lms.env.json
+ENV STUDIO_CFG /openedx/config/cms.env.json
+ENV REVISION_CFG /openedx/config/revisions.yml
 COPY settings/lms/*.py ./lms/envs/tutor/
 COPY settings/cms/*.py ./cms/envs/tutor/
 
@@ -102,6 +96,10 @@ RUN chmod a+x /openedx/bin/*
 ENV PATH /openedx/bin:${PATH}
 
 {{ patch("openedx-dockerfile-pre-assets") }}
+
+# TODO Some environment variables are expected to be defined by some nodejs code
+# E.g: LMS_ROOT_URL, JWT_AUTH_COOKIE_HEADER_PAYLOAD, EDXMKTG_USER_INFO_COOKIE_NAME...
+# This is awful. This means that we will not be able to compile static assets for users anymore.
 
 # Collect production assets. By default, only assets from the default theme
 # will be processed. This makes the docker image lighter and faster to build.

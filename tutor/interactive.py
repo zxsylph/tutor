@@ -1,5 +1,3 @@
-import os
-
 import click
 
 from . import config as tutor_config
@@ -22,8 +20,7 @@ def load_all(root, interactive=True):
     """
     Load configuration and interactively ask questions to collect param values from the user.
     """
-    defaults = tutor_config.load_defaults()
-    config = tutor_config.load_current(root, defaults)
+    config, defaults = tutor_config.load_all(root)
     if interactive:
         ask_questions(config, defaults)
     return config, defaults
