@@ -145,8 +145,10 @@ spec:
             - mountPath: /openedx/config
               name: config
           resources:
+            limits:
+              cpu : 1000m
             requests:
-              memory: 2Gi
+              memory: 1536Mi
       volumes:
         - name: settings-lms
           configMap:
