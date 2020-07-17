@@ -2,6 +2,21 @@
 
 Note: Breaking changes between versions are indicated by "💥".
 
+## v10.0.11 (2020-07-16)
+
+- [Feature] Upgrade all repositories to open-release/juniper.2
+- [Bugfix] Fix `reload-gunicorn` command
+- [Feature] Enable sysadmin dashboard in LMS at /sysadmin
+
+## v10.0.10 (2020-07-01)
+
+- [Bugfix] Fix pycontracts installation error when building openedx Docker image
+- [Bugfix] Fix access to dicussion forum in development mode
+
+## v10.0.9 (2020-07-01)
+
+- [Bugfix] Share grade download settings between the LMS and the CMS
+
 ## v10.0.8 (2020-06-23)
 
 - [Bugfix] Fix android user creation during init

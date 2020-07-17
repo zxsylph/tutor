@@ -28,16 +28,14 @@ RUN curl -L -o /tmp/dockerize.tar.gz https://github.com/jwilder/dockerize/releas
 
 # Checkout edx-platform code
 ARG EDX_PLATFORM_REPOSITORY=https://github.com/edx/edx-platform.git
-ARG EDX_PLATFORM_VERSION=open-release/juniper.1
+ARG EDX_PLATFORM_VERSION=open-release/juniper.2
 RUN mkdir -p /openedx/edx-platform && \
     git clone $EDX_PLATFORM_REPOSITORY --branch $EDX_PLATFORM_VERSION --depth 1 /openedx/edx-platform
 WORKDIR /openedx/edx-platform
 
 # Patch edx-platform
-# Apply xss security fixes https://github.com/edx/edx-platform/pull/24258
-RUN curl https://github.com/overhangio/edx-platform/commit/1ab907b2b019f54450153b08cecb115d668efd25.patch | git apply -
 # Get rid of lepl-related warnings
-# https://github.com/edx/edx-platform/pull/24059 
+# https://github.com/edx/edx-platform/pull/24059
 # https://github.com/overhangio/edx-platform/tree/overhangio/lepl-rfc6266-warning
 RUN curl https://github.com/overhangio/edx-platform/commit/5f21bbe77056d71ca61b97b6badcff3c1a31b858.patch | git apply -
 # Fix creation of LTI provider objects
@@ -51,10 +49,10 @@ RUN curl https://github.com/overhangio/edx-platform/commit/6dbf2eddf7a4563c04c3b
 
 # Download extra locales to /openedx/locale/contrib/locale
 RUN cd /tmp \
-    && curl -L -o openedx-i18n.tar.gz https://github.com/openedx/openedx-i18n/archive/juniper.1.tar.gz \
+    && curl -L -o openedx-i18n.tar.gz https://github.com/openedx/openedx-i18n/archive/juniper.2.tar.gz \
     && tar xzf /tmp/openedx-i18n.tar.gz \
     && mkdir -p /openedx/locale/contrib \
-    && mv openedx-i18n-juniper.1/edx-platform/locale /openedx/locale/contrib \
+    && mv openedx-i18n-juniper.2/edx-platform/locale /openedx/locale/contrib \
     && rm -rf openedx-i18n*
 
 # Install python requirements in a virtualenv
