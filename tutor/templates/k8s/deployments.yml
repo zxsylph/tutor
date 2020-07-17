@@ -493,7 +493,7 @@ spec:
       describedObject:
         apiVersion: extensions/v1beta1
         kind: ingress
-        name: openedx-do
+        name: openedx
       target:
         type: AverageValue
         value: 100
