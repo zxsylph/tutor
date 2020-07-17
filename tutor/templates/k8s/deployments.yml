@@ -420,3 +420,51 @@ spec:
             claimName: rabbitmq
 {% endif %}
 {{ patch("k8s-deployments") }}
+
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lms
+  namespace: openedx
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lms
+  minReplicas: 3
+  maxReplicas: 12
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx
+  namespace: openedx
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx
+  minReplicas: 1
+  maxReplicas: 8
+  metrics:
+  - type: Object
+    object:
+      metric:
+        name: nginx_ingress_request_per_second
+      describedObject:
+        apiVersion: extensions/v1beta1
+        kind: ingress
+        name: openedx-do
+      target:
+        type: AverageValue
+        value: 100
