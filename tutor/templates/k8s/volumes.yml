@@ -12,7 +12,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 20Gi
+      storage: 2Gi
 {% endif %}
 {% if ACTIVATE_MONGODB %}
 ---
@@ -28,7 +28,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 50Gi
+      storage: 5Gi
 {% endif %}
 {% if ACTIVATE_MYSQL %}
 ---
@@ -44,7 +44,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 50Gi
+      storage: 5Gi
 {% endif %}
 {% if ACTIVATE_RABBITMQ %}
 ---
@@ -60,6 +60,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 1Gi
 {% endif %}
 {{ patch("k8s-volumes") }}
