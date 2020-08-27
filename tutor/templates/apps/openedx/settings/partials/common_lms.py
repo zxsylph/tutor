@@ -22,8 +22,6 @@ for folder in [DATA_DIR, LOG_DIR, MEDIA_ROOT, STATIC_ROOT_BASE, ORA2_FILEUPLOAD_
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-ORA2_FILEUPLOAD_BACKEND = "s3"
-
 {{ patch("openedx-lms-common-settings") }}
 
 ######## End of common LMS settings

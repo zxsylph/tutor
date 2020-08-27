@@ -432,8 +432,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: lms
-  minReplicas: 1
-  maxReplicas: 1
+  minReplicas: 3
+  maxReplicas: 12
   metrics:
   - type: Resource
     resource:
